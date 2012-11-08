@@ -49,6 +49,9 @@ For example, to load the server address from a function called
 webshell.SERVER_ADDR = LoadAddressFromDB()
 ```
 
+An example shell script that can be sourced to sane defaults for the
+server may be found in `examples/env.sh`.
+
 ### License
 
 `webshell` is licensed under an ISC license. The `LICENSE` file contains
