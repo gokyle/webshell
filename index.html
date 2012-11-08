@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Webshell by gokyle</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Webshell</h1>
+        <p>A shell for new Go webapps</p>
+
+        <p class="view"><a href="https://github.com/gokyle/webshell">View the Project on GitHub <small>gokyle/webshell</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/gokyle/webshell/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/gokyle/webshell/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/gokyle/webshell">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h3>Introduction</h3>
+
+<p><code>webshell</code> is a simple framework for quickly getting started with new
+webapps in Go. It loads all of its configuration from environment
+variables, and can be configured for TLS or insecure operation.</p>
+
+<div class="highlight"><pre><span class="c1">// example/example.go: very quick example program</span>
+<span class="k">package</span> <span class="n">main</span>
+
+<span class="k">import</span> <span class="p">(</span>
+        <span class="s">"github.com/gokyle/webshell"</span>
+        <span class="s">"net/http"</span>
+<span class="p">)</span>
+
+<span class="k">func</span> <span class="n">hello_world</span><span class="p">(</span><span class="n">w</span> <span class="n">http</span><span class="p">.</span><span class="n">ResponseWriter</span><span class="p">,</span> <span class="n">r</span> <span class="p">*</span><span class="n">http</span><span class="p">.</span><span class="n">Request</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">w</span><span class="p">.</span><span class="n">Write</span><span class="p">([]</span><span class="nb">byte</span><span class="p">(</span><span class="s">"hello, "</span> <span class="p">+</span> <span class="n">r</span><span class="p">.</span><span class="n">RemoteAddr</span><span class="p">))</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// load the requisite environment variables</span>
+        <span class="n">webshell</span><span class="p">.</span><span class="n">LoadEnv</span><span class="p">()</span>
+        <span class="c1">// add an endpoint to our server</span>
+        <span class="n">webshell</span><span class="p">.</span><span class="n">AddRoute</span><span class="p">(</span><span class="s">"/hello"</span><span class="p">,</span> <span class="n">hello_world</span><span class="p">)</span>
+        <span class="c1">// start a HTTP-only web server</span>
+        <span class="n">webshell</span><span class="p">.</span><span class="n">Serve</span><span class="p">(</span><span class="n">false</span><span class="p">,</span> <span class="n">nil</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>Configuration</h3>
+
+<p><code>webshell</code> by default pulls its configuration in from the environment.
+<code>LoadEnv()</code> will set the relevant variables. However, this can be
+bypassed to use your own configuration method. The relevant variables
+are (note that the environment variables have the same name):</p>
+
+<ul>
+<li>
+<code>SERVER_ADDR</code> contains the address the server should listen on.</li>
+<li>
+<code>SERVER_PORT</code> contains the port the server should listen on.</li>
+<li>
+<code>SSL_KEY</code> contains the path to the SSL private key.</li>
+<li>
+<code>SSL_CERT</code> contains the path to the SSL certficate.</li>
+</ul><p>For example, to load the server address from a function called
+<code>LoadAddressFromDB</code>:</p>
+
+<div class="highlight"><pre><span class="n">webshell</span><span class="p">.</span><span class="n">SERVER_ADDR</span> <span class="p">=</span> <span class="n">LoadAddressFromDB</span><span class="p">()</span>
+</pre></div>
+
+<p>An example shell script that can be sourced to sane defaults for the
+server may be found in <code>examples/env.sh</code>.</p>
+
+<h3>License</h3>
+
+<p><code>webshell</code> is licensed under an ISC license. The <code>LICENSE</code> file contains
+the full text of the license.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/gokyle">gokyle</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
