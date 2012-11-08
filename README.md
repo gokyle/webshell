@@ -8,7 +8,7 @@ webapps in Go. It loads all of its configuration from environment
 variables, and can be configured for TLS or insecure operation.
 
 ```go
-example/example.go: very quick example program
+// example/example.go: very quick example program
 package main
 
 import (
