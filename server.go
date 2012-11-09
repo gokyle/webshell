@@ -41,12 +41,12 @@ func main() {
  * will not be serving TLS requests.
  */
 func Serve(doTLS bool, tlsCfg *tls.Config) {
-        var serverAddress string
-        if SERVER_PORT != "" {
-                serverAddress = fmt.Sprintf("%s:%s", SERVER_ADDR, SERVER_PORT)
-        } else {
-                serverAddress = SERVER_ADDR
-        }
+	var serverAddress string
+	if SERVER_PORT != "" {
+		serverAddress = fmt.Sprintf("%s:%s", SERVER_ADDR, SERVER_PORT)
+	} else {
+		serverAddress = SERVER_ADDR
+	}
 	log.Println("server address:", serverAddress)
 	srv := &http.Server{
 		Addr:           serverAddress,
@@ -62,13 +62,13 @@ func Serve(doTLS bool, tlsCfg *tls.Config) {
 		}
 		srv.TLSConfig = tlsCfg
 		log.Println("listening for incoming TLS connections")
-                log.Printf("using credentials:\n\tkey: %s\n\tcert: %s\n",
-                        SSL_KEY, SSL_CERT)
+		log.Printf("using credentials:\n\tkey: %s\n\tcert: %s\n",
+			SSL_KEY, SSL_CERT)
 		log.Fatalf("error in ListenAndServeTLS:\n\t%+v",
-                        srv.ListenAndServeTLS(SSL_CERT, SSL_KEY))
+			srv.ListenAndServeTLS(SSL_CERT, SSL_KEY))
 	} else {
 		log.Println("listening for incoming HTTP connections")
 		log.Fatalf("error in ListenAndServe:\n\t%+v\n",
-                        srv.ListenAndServe())
+			srv.ListenAndServe())
 	}
 }
