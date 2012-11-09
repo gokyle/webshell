@@ -21,7 +21,7 @@ var (
 // LoadEnv pulls in configuration data from the environment.
 func LoadEnv() {
 	SSL_KEY = os.Getenv("SSL_KEY")
-	SSL_KEY = os.Getenv("SSL_CERT")
+	SSL_CERT = os.Getenv("SSL_CERT")
 	SERVER_ADDR = os.Getenv("SERVER_ADDR")
 	SERVER_PORT = os.Getenv("SERVER_PORT")
 }
@@ -62,7 +62,7 @@ func Serve(doTLS bool, tlsCfg *tls.Config) {
 		}
 		srv.TLSConfig = tlsCfg
 		log.Println("listening for incoming TLS connections")
-                log.Printf("using credentials:\n\tkey: %s\n\t%s\n",
+                log.Printf("using credentials:\n\tkey: %s\n\tcert: %s\n",
                         SSL_KEY, SSL_CERT)
 		log.Fatalf("error in ListenAndServeTLS:\n\t%+v",
                         srv.ListenAndServeTLS(SSL_CERT, SSL_KEY))
