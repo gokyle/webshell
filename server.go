@@ -62,6 +62,8 @@ func Serve(doTLS bool, tlsCfg *tls.Config) {
 		}
 		srv.TLSConfig = tlsCfg
 		log.Println("listening for incoming TLS connections")
+                log.Printf("using credentials:\n\tkey: %s\n\t%s\n",
+                        SSL_KEY, SSL_CERT)
 		log.Fatalf("error in ListenAndServeTLS:\n\t%+v",
                         srv.ListenAndServeTLS(SSL_CERT, SSL_KEY))
 	} else {
