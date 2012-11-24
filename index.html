@@ -78,6 +78,9 @@ are (note that the environment variables have the same name):</p>
 <div class="highlight"><pre><span class="n">webshell</span><span class="p">.</span><span class="n">SERVER_ADDR</span> <span class="p">=</span> <span class="n">LoadAddressFromDB</span><span class="p">()</span>
 </pre></div>
 
+<p>Another alternative is the <a href="https://github.com/gokyle/goconfig"><code>goconfig</code></a>
+package.</p>
+
 <p>An example shell script that can be sourced to sane defaults for the
 server may be found in <code>examples/env.sh</code>.</p>
 
@@ -92,7 +95,10 @@ server may be found in <code>examples/env.sh</code>.</p>
 <code>templates</code>: templating example</li>
 <li>
 <code>static</code>: demonstrates the use of the static serving functions</li>
-</ul><h3>License</h3>
+</ul><p>Each example should be run from its respective directory, as some use
+relative paths in their routes.</p>
+
+<h3>License</h3>
 
 <p><code>webshell</code> is licensed under an ISC license. The <code>LICENSE</code> file contains
 the full text of the license.</p>
