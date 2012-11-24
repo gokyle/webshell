@@ -49,6 +49,9 @@ For example, to load the server address from a function called
 webshell.SERVER_ADDR = LoadAddressFromDB()
 ```
 
+Another alternative is the [`goconfig`](https://github.com/gokyle/goconfig)
+package.
+
 An example shell script that can be sourced to sane defaults for the
 server may be found in `examples/env.sh`.
 
@@ -57,6 +60,9 @@ Contained in the `examples` subdirectory:
 * `basic`: bare bones example
 * `templates`: templating example
 * `static`: demonstrates the use of the static serving functions
+
+Each example should be run from its respective directory, as some use
+relative paths in their routes.
 
 ### License
 
