@@ -52,6 +52,12 @@ webshell.SERVER_ADDR = LoadAddressFromDB()
 An example shell script that can be sourced to sane defaults for the
 server may be found in `examples/env.sh`.
 
+### Examples
+Contained in the `examples` subdirectory:
+* `basic`: bare bones example
+* `templates`: templating example
+* `static`: demonstrates the use of the static serving functions
+
 ### License
 
 `webshell` is licensed under an ISC license. The `LICENSE` file contains

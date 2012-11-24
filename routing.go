@@ -11,3 +11,10 @@ var RouterMux = http.NewServeMux()
 func AddRoute(path string, handler RouteHandler) {
 	RouterMux.HandleFunc(path, handler)
 }
+
+// StaticRoute sets up a route for serving static files.
+// route sets the route that should be used, and path is the path to the
+// static files
+func StaticRoute(route string, path string) {
+        RouterMux.Handle(route, http.FileServer(http.Dir(path)))
+}
