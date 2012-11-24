@@ -11,6 +11,7 @@ import (
 
 const WEBSHELL_VERSION = "1.0.0"
 
+// Server configuration options.
 var (
 	SSL_KEY     string
 	SSL_CERT    string
@@ -32,14 +33,14 @@ func main() {
 }
 
 /*
- * Server handles the HTTP server set up (with option TLS setup) and
- * and serving. It is a blocking function, so any additional functions that
- * need to be concurrently run should be fired off via goroutines prior to
- * calling Server. If tlsCfg is not nil, the server will use it as the
- * TLS configuration for the server. If it is nil, the server will create
- * a default configuration. This argument has no effect if the server
- * will not be serving TLS requests.
- */
+   Server handles the HTTP server set up (with option TLS setup) and
+   and serving. It is a blocking function, so any additional functions that
+   need to be concurrently run should be fired off via goroutines prior to
+   calling Server. If tlsCfg is not nil, the server will use it as the
+   TLS configuration for the server. If it is nil, the server will create
+   a default configuration. This argument has no effect if the server
+   will not be serving TLS requests.
+*/
 func Serve(doTLS bool, tlsCfg *tls.Config) {
 	var serverAddress string
 	if SERVER_PORT != "" {
