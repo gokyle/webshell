@@ -13,7 +13,7 @@ func main() {
         // load the requisite environment variables
         webshell.LoadEnv()
         // add an endpoint to our server
-        webshell.AddRoute("/hello", hello_world)
+        webshell.AddRoute("/", hello_world)
         // start a HTTP-only web server
         webshell.Serve(false, nil)
 }
