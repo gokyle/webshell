@@ -57,7 +57,7 @@ func GenerateErrorHandler(status int) ErrorRoute {
 
 // GenerateTemplateErrorHandler returns a function serving a templated error
 func GenerateTemplateErrorHandler(status int, filename string) (hdlr TemplateErrorRoute, err error) {
-	err := CheckTemplate(filename)
+	err = CheckTemplate(filename)
 	if err != nil {
 		return
 	}
@@ -71,7 +71,7 @@ func GenerateTemplateErrorHandler(status int, filename string) (hdlr TemplateErr
 		w.WriteHeader(status)
 		w.Write(msg)
 	}
-	return hdlr
+	return
 }
 
 func initDefaultErrors() {
