@@ -4,8 +4,9 @@
 ### Introduction
 
 `webshell` is a simple framework for quickly getting started with new
-webapps in Go. It loads all of its configuration from environment
-variables, and can be configured for TLS or insecure operation.
+webapps in Go. By default, it loads all of its configuration from
+environment variables, and can be configured for TLS or insecure
+peration.
 
 ```go
 // example/example.go: very quick example program
@@ -68,4 +69,3 @@ relative paths in their routes.
 
 `webshell` is licensed under an ISC license. The `LICENSE` file contains
 the full text of the license.
-
