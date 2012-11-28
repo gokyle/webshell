@@ -42,7 +42,7 @@ func main() {
    will not be serving TLS requests.
 */
 func Serve(doTLS bool, tlsCfg *tls.Config) {
-        initDefaultErrors()
+	initDefaultErrors()
 	var serverAddress string
 	if SERVER_PORT != "" {
 		serverAddress = fmt.Sprintf("%s:%s", SERVER_ADDR, SERVER_PORT)

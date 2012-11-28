@@ -3,7 +3,7 @@ package webshell
 import (
 	"log"
 	"net/http"
-        "path/filepath"
+	"path/filepath"
 )
 
 // Simple name for a function capable of handling a route.
@@ -44,20 +44,20 @@ func AddRoute(path string, handler RouteHandler) {
 // route sets the route that should be used, and path is the path to the
 // static files. Note that both the route and path should include a string.
 func StaticRoute(route string, path string) {
-        var err error
-        if len(route) == 0 {
-                panic("Invalid route: " + route + " -> " + path)
-        }
-        if len(path) == 0 {
-                panic("Invalid path:" + route + " -> " + path)
-        } else {
-                path, err = filepath.Abs(path)
-                if err != nil {
-                        panic(err)
-                }
-        }
+	var err error
+	if len(route) == 0 {
+		panic("Invalid route: " + route + " -> " + path)
+	}
+	if len(path) == 0 {
+		panic("Invalid path:" + route + " -> " + path)
+	} else {
+		path, err = filepath.Abs(path)
+		if err != nil {
+			panic(err)
+		}
+	}
 	RouterMux.Handle(route, http.StripPrefix(route, http.FileServer(http.Dir(path))))
-        log.Printf("static route: %s -> %s\n", route, path)
+	log.Printf("static route: %s -> %s\n", route, path)
 }
 
 // GenerateErrorHandler returns a RouteHandler function
