@@ -36,6 +36,12 @@ func (app *WebApp) AddRoute(path string, handler RouteHandler) {
 	app.mux.HandleFunc(path, handler)
 }
 
+func (app *WebApp) AddConditionalRoute(condition bool, path string, handler RouteHandler) {
+        if condition {
+                app.AddRoute(path, handler)
+        }
+}
+
 func (app *WebApp) StaticRoute(route string, path string) {
 	var err error
 	if len(route) == 0 {
