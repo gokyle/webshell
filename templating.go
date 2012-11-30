@@ -6,24 +6,33 @@ import (
 	"path/filepath"
 )
 
-// ServeTemplate serves the template specified in filename, executed with the
-// data specified in 'in', and returns a byte slice and error.
-func ServeTemplate(filename string, in interface{}) (out []byte, err error) {
-	buffer := new(bytes.Buffer)
-
+func CompileTemplate(filename string) (tpl *template.Template, err error) {
 	template_name := filepath.Base(filename)
-	tpl := template.New(template_name)
+	tpl = template.New(template_name)
 	if err != nil {
 		return
 	}
 	tpl, err = tpl.ParseFiles(filename)
+        return
+}
+
+func ServeTemplate(tpl *template.Template, in interface{}) (out []byte, err error) {
+        buffer := new(bytes.Buffer)
+        err = tpl.Execute(buffer, in)
+        if err == nil {
+                out = buffer.Bytes()
+        }
+        return
+}
+
+// ServeTemplate serves the template specified in filename, executed with the
+// data specified in 'in', and returns a byte slice and error.
+func ServeTemplateFile(filename string, in interface{}) (out []byte, err error) {
+        tpl, err := CompileTemplate(filename)
 	if err != nil {
 		return
 	}
-	err = tpl.Execute(buffer, in)
-	if err == nil {
-		out = buffer.Bytes()
-	}
+        out, err = ServeTemplate(tpl, in)
 	return
 }
 

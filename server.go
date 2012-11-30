@@ -2,75 +2,93 @@ package webshell
 
 import (
 	"crypto/tls"
-	"fmt"
-	"log"
 	"net/http"
-	"os"
 	"time"
 )
 
 const WEBSHELL_VERSION = "1.0.0"
 
-// Server configuration options.
 var (
-	SSL_KEY     string
-	SSL_CERT    string
-	SERVER_ADDR string
-	SERVER_PORT string
+        ReadTimeout = 3 * time.Second
+        WriteTimeout = 3 * time.Second
 )
 
-// LoadEnv pulls in configuration data from the environment.
-func LoadEnv() {
-	SSL_KEY = os.Getenv("SSL_KEY")
-	SSL_CERT = os.Getenv("SSL_CERT")
-	SERVER_ADDR = os.Getenv("SERVER_ADDR")
-	SERVER_PORT = os.Getenv("SERVER_PORT")
+type WebApp struct {
+        name string
+        host string
+        port string
+        key string
+        cert string
+        srv *http.Server
+        mux *http.ServeMux
 }
 
-func main() {
-	log.Println("starting server")
-	Serve(false, nil)
+// Retrieve the app's name.
+func (app *WebApp) Name() string {
+        return app.name
 }
 
-/*
-   Server handles the HTTP server set up (with option TLS setup) and
-   and serving. It is a blocking function, so any additional functions that
-   need to be concurrently run should be fired off via goroutines prior to
-   calling Server. If tlsCfg is not nil, the server will use it as the
-   TLS configuration for the server. If it is nil, the server will create
-   a default configuration. This argument has no effect if the server
-   will not be serving TLS requests.
-*/
-func Serve(doTLS bool, tlsCfg *tls.Config) {
-	initDefaultErrors()
-	var serverAddress string
-	if SERVER_PORT != "" {
-		serverAddress = fmt.Sprintf("%s:%s", SERVER_ADDR, SERVER_PORT)
-	} else {
-		serverAddress = SERVER_ADDR
-	}
-	log.Println("server address:", serverAddress)
-	srv := &http.Server{
-		Addr:           serverAddress,
-		Handler:        RouterMux,
-		ReadTimeout:    3 * time.Second,
-		WriteTimeout:   3 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
-
-	if doTLS {
-		if tlsCfg == nil {
-			tlsCfg = new(tls.Config)
-		}
-		srv.TLSConfig = tlsCfg
-		log.Println("listening for incoming TLS connections")
-		log.Printf("using credentials:\n\tkey: %s\n\tcert: %s\n",
-			SSL_KEY, SSL_CERT)
-		log.Fatalf("error in ListenAndServeTLS:\n\t%+v",
-			srv.ListenAndServeTLS(SSL_CERT, SSL_KEY))
-	} else {
-		log.Println("listening for incoming HTTP connections")
-		log.Fatalf("error in ListenAndServe:\n\t%+v\n",
-			srv.ListenAndServe())
-	}
+// Retrieve the app's host.
+func (app *WebApp) Host() string {
+        return app.host
 }
+
+// Retrieve the app's port.
+func (app *WebApp) Port() string {
+        return app.port
+}
+
+// Retrieve the address (host + port) the app will serve on.
+func (app *WebApp) Address() string {
+        return serverAddress(app.host, app.port)
+}
+
+// IsTLS returns true if the app is configured for TLS.
+func (app *WebApp) IsTLS() bool {
+        return app.srv.TLSConfig != nil
+}
+
+func serverAddress(host, port string) string {
+        if host == "" {
+                return ":" + port
+        } else {
+                return host + ":" + port
+        }
+        return ""
+}
+
+func NewApp(name, host, port string) *WebApp {
+        mux := http.NewServeMux()
+        srv := &http.Server{
+                Addr:           serverAddress(host, port),
+                Handler:        mux,
+                ReadTimeout:    ReadTimeout,
+                WriteTimeout:   WriteTimeout,
+                MaxHeaderBytes: 1 << 20,
+        }
+
+        app := WebApp{name, host, port, "", "", srv, mux,}
+        return &app
+}
+
+func NewTLSApp(name, host, port, key, cert string) *WebApp {
+        app := NewApp(name, host, port)
+        app.key = key
+        app.cert = cert
+        app.srv.TLSConfig = new(tls.Config)
+        return app
+}
+
+
+// Serve enables the web server; if it is configured for TLS, it will
+// listen for and serve TLS requests. If not, it will serve standard
+// HTTP requests.
+func (app *WebApp) Serve() error {
+        if app.IsTLS() {
+                return app.srv.ListenAndServeTLS(app.cert, app.key)
+        } else {
+                return app.srv.ListenAndServe()
+        }
+        return nil
+}
+

@@ -13,8 +13,6 @@ type RouteHandler func(w http.ResponseWriter, r *http.Request)
 type ErrorRoute func(string, string, http.ResponseWriter, *http.Request)
 type TemplateErrorRoute func(interface{}, http.ResponseWriter, *http.Request)
 
-var RouterMux = http.NewServeMux()
-
 // Generic error handlers. They take a message and content-type as a string,
 // as well as the HTTP response writer and request, and respond with the
 // named error. The http.StatusText function may be used to return the
@@ -34,16 +32,11 @@ var (
 	Error503 func(msg, ctype string, w http.ResponseWriter, r *http.Request)
 )
 
-// AddRoute is syntactic sugar for adding routes to aid in late night hacks.
-// All this does is call RouterMux.HandleFunc(path, handler).
-func AddRoute(path string, handler RouteHandler) {
-	RouterMux.HandleFunc(path, handler)
+func (app *WebApp) AddRoute(path string, handler RouteHandler) {
+	app.mux.HandleFunc(path, handler)
 }
 
-// StaticRoute sets up a route for serving static files.
-// route sets the route that should be used, and path is the path to the
-// static files. Note that both the route and path should include a string.
-func StaticRoute(route string, path string) {
+func (app *WebApp) StaticRoute(route string, path string) {
 	var err error
 	if len(route) == 0 {
 		panic("Invalid route: " + route + " -> " + path)
@@ -56,7 +49,7 @@ func StaticRoute(route string, path string) {
 			panic(err)
 		}
 	}
-	RouterMux.Handle(route, http.StripPrefix(route, http.FileServer(http.Dir(path))))
+	app.mux.Handle(route, http.StripPrefix(route, http.FileServer(http.Dir(path))))
 	log.Printf("static route: %s -> %s\n", route, path)
 }
 
@@ -71,12 +64,12 @@ func GenerateErrorHandler(status int) ErrorRoute {
 
 // GenerateTemplateErrorHandler returns a function serving a templated error
 func GenerateTemplateErrorHandler(status int, filename string) (hdlr TemplateErrorRoute, err error) {
-	err = CheckTemplate(filename)
+        tpl, err := CompileTemplate(filename)
 	if err != nil {
 		return
 	}
 	hdlr = func(in interface{}, w http.ResponseWriter, r *http.Request) {
-		msg, err := ServeTemplate(filename, in)
+		msg, err := ServeTemplate(tpl, in)
 		if err != nil {
 			log.Printf("error serving template %d %s: %s\n",
 				status, filename, err.Error())
@@ -88,7 +81,7 @@ func GenerateTemplateErrorHandler(status int, filename string) (hdlr TemplateErr
 	return
 }
 
-func initDefaultErrors() {
+func InitDefaultErrors() {
 	Error400 = GenerateErrorHandler(http.StatusBadRequest)
 	Error401 = GenerateErrorHandler(http.StatusUnauthorized)
 	Error403 = GenerateErrorHandler(http.StatusForbidden)
@@ -99,4 +92,14 @@ func initDefaultErrors() {
 	Error502 = GenerateErrorHandler(http.StatusBadGateway)
 	Error503 = GenerateErrorHandler(http.StatusServiceUnavailable)
 
+}
+
+func ContentResponder(r *http.Request) string {
+        accept := r.Header["Accept"][0]
+        if accept == "" {
+                return "text/plain"
+        } else if accept == "*/*" {
+                return "text/plain"
+        }
+        return accept
 }
