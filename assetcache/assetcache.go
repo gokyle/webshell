@@ -1,3 +1,6 @@
+// Package assetcache provides a caching asset handler for static assets.
+// If the asset is not in memory, assetcache will cache it for faster
+// access.
 package assetcache
 
 import (
