@@ -37,9 +37,9 @@ func (app *WebApp) AddRoute(path string, handler RouteHandler) {
 }
 
 func (app *WebApp) AddConditionalRoute(condition bool, path string, handler RouteHandler) {
-        if condition {
-                app.AddRoute(path, handler)
-        }
+	if condition {
+		app.AddRoute(path, handler)
+	}
 }
 
 func (app *WebApp) StaticRoute(route string, path string) {
@@ -70,7 +70,7 @@ func GenerateErrorHandler(status int) ErrorRoute {
 
 // GenerateTemplateErrorHandler returns a function serving a templated error
 func GenerateTemplateErrorHandler(status int, filename string) (hdlr TemplateErrorRoute, err error) {
-        tpl, err := CompileTemplate(filename)
+	tpl, err := CompileTemplate(filename)
 	if err != nil {
 		return
 	}
@@ -101,11 +101,11 @@ func InitDefaultErrors() {
 }
 
 func ContentResponder(r *http.Request) string {
-        accept := r.Header["Accept"][0]
-        if accept == "" {
-                return "text/plain"
-        } else if accept == "*/*" {
-                return "text/plain"
-        }
-        return accept
+	accept := r.Header["Accept"][0]
+	if accept == "" {
+		return "text/plain"
+	} else if accept == "*/*" {
+		return "text/plain"
+	}
+	return accept
 }
