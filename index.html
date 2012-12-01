@@ -31,15 +31,14 @@
         <h3>Introduction</h3>
 
 <p><code>webshell</code> is a simple framework for quickly getting started with new
-webapps in Go. By default, it loads all of its configuration from
-environment variables, and can be configured for TLS or insecure
-peration.</p>
+webapps in Go that can be configured for TLS or insecure operation.</p>
 
 <div class="highlight"><pre><span class="c1">// example/example.go: very quick example program</span>
 <span class="k">package</span> <span class="n">main</span>
 
 <span class="k">import</span> <span class="p">(</span>
         <span class="s">"github.com/gokyle/webshell"</span>
+        <span class="s">"log"</span>
         <span class="s">"net/http"</span>
 <span class="p">)</span>
 
@@ -48,44 +47,44 @@ peration.</p>
 <span class="p">}</span>
 
 <span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-        <span class="c1">// load the requisite environment variables</span>
-        <span class="n">webshell</span><span class="p">.</span><span class="n">LoadEnv</span><span class="p">()</span>
+        <span class="c1">// create the app</span>
+        <span class="n">app</span> <span class="p">:=</span> <span class="n">webshell</span><span class="p">.</span><span class="n">NewApp</span><span class="p">(</span><span class="s">"example app"</span><span class="p">,</span> <span class="s">"127.0.0.1"</span><span class="p">,</span> <span class="s">"8080"</span><span class="p">)</span>
         <span class="c1">// add an endpoint to our server</span>
-        <span class="n">webshell</span><span class="p">.</span><span class="n">AddRoute</span><span class="p">(</span><span class="s">"/hello"</span><span class="p">,</span> <span class="n">hello_world</span><span class="p">)</span>
+        <span class="n">app</span><span class="p">.</span><span class="n">AddRoute</span><span class="p">(</span><span class="s">"/"</span><span class="p">,</span> <span class="n">hello_world</span><span class="p">)</span>
         <span class="c1">// start a HTTP-only web server</span>
-        <span class="n">webshell</span><span class="p">.</span><span class="n">Serve</span><span class="p">(</span><span class="n">false</span><span class="p">,</span> <span class="n">nil</span><span class="p">)</span>
+        <span class="n">log</span><span class="p">.</span><span class="n">Fatal</span><span class="p">(</span><span class="n">app</span><span class="p">.</span><span class="n">Serve</span><span class="p">())</span>
 <span class="p">}</span>
 </pre></div>
 
-<h3>Configuration</h3>
+<h3>Creating a New WebApp</h3>
 
-<p><code>webshell</code> by default pulls its configuration in from the environment.
-<code>LoadEnv()</code> will set the relevant variables. However, this can be
-bypassed to use your own configuration method. The relevant variables
-are (note that the environment variables have the same name):</p>
+<p>There are two ways to create a new webapp:</p>
 
 <ul>
 <li>
-<code>SERVER_ADDR</code> contains the address the server should listen on.</li>
+<code>NewApp(name, host, port) *WebApp</code> creates an HTTP app</li>
 <li>
-<code>SERVER_PORT</code> contains the port the server should listen on.</li>
+<code>NewTLSApp(name, host, port, keypath, certpath) *WebApp</code> creates a new TLS
+app.</li>
+</ul><p>The returned app can be started with <code>Serve()</code>; an app can be queried for its
+name, host and port with the <code>Name()</code>, <code>Host()</code>, and <code>Port()</code> methods. It can
+also be queried to determine if it is a TLS app using the <code>IsTLS()</code> method.</p>
+
+<h3>Adding Routes</h3>
+
+<p>WebApps have three methods for adding new routes:</p>
+
+<ul>
 <li>
-<code>SSL_KEY</code> contains the path to the SSL private key.</li>
+<code>AddRoute(route, handler)</code> will add a new route, panicking if the route
+couldn't be added.</li>
 <li>
-<code>SSL_CERT</code> contains the path to the SSL certficate.</li>
-</ul><p>For example, to load the server address from a function called
-<code>LoadAddressFromDB</code>:</p>
-
-<div class="highlight"><pre><span class="n">webshell</span><span class="p">.</span><span class="n">SERVER_ADDR</span> <span class="p">=</span> <span class="n">LoadAddressFromDB</span><span class="p">()</span>
-</pre></div>
-
-<p>Another alternative is the <a href="https://github.com/gokyle/goconfig"><code>goconfig</code></a>
-package.</p>
-
-<p>An example shell script that can be sourced to sane defaults for the
-server may be found in <code>examples/env.sh</code>.</p>
-
-<h3>Examples</h3>
+<code>AddConditionalRoute(condition, route, path)</code> adds the route if condition
+is true; it, too, will panic on error.</li>
+<li>
+<code>StaticRoute(route, path)</code> runs a basic file server on the directory, i.e.
+for static assets.</li>
+</ul><h3>Examples</h3>
 
 <p>Contained in the <code>examples</code> subdirectory:</p>
 
