@@ -2,6 +2,9 @@
 // This package is designed so that users should really only have to supply
 // their own means of procuring an AuthProvider in order to make use of the
 // provided functionality.
+//
+// To return a hash, salt from a password, the HashPass function is provided.
+// The end user can store these safely in their database.
 package auth
 
 import "bitbucket.org/taruti/pbkdf2"
