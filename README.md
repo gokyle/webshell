@@ -62,6 +62,16 @@ Contained in the `examples` subdirectory:
 Each example should be run from its respective directory, as some use
 relative paths in their routes.
 
+### Subpackages
+* `webshell/assetcache` provides a simple file cache for static assets
+that can help speed up asset delivery.
+* `webshell/auth` provides password authentication code; the user need only
+supply a function that translates a user ID into a pair of byte slices. It
+uses the PBKDF2 key derivation function.
+
+### Under Development
+* `webshell/logging` will provide a logging interface for requests.
+
 ### License
 
 `webshell` is licensed under an ISC license. The `LICENSE` file contains
