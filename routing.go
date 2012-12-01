@@ -34,6 +34,7 @@ var (
 
 func (app *WebApp) AddRoute(path string, handler RouteHandler) {
 	app.mux.HandleFunc(path, handler)
+        log.Printf("[+] route %s added\n", path)
 }
 
 func (app *WebApp) AddConditionalRoute(condition bool, path string, handler RouteHandler) {
@@ -56,7 +57,7 @@ func (app *WebApp) StaticRoute(route string, path string) {
 		}
 	}
 	app.mux.Handle(route, http.StripPrefix(route, http.FileServer(http.Dir(path))))
-	log.Printf("static route: %s -> %s\n", route, path)
+	log.Printf("static route %s -> %s added\n", route, path)
 }
 
 // GenerateErrorHandler returns a RouteHandler function
