@@ -4,9 +4,7 @@
 ### Introduction
 
 `webshell` is a simple framework for quickly getting started with new
-webapps in Go. By default, it loads all of its configuration from
-environment variables, and can be configured for TLS or insecure
-peration.
+webapps in Go that can be configured for TLS or insecure operation.
 
 ```go
 // example/example.go: very quick example program
@@ -14,6 +12,7 @@ package main
 
 import (
         "github.com/gokyle/webshell"
+        "log"
         "net/http"
 )
 
@@ -22,39 +21,37 @@ func hello_world(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-        // load the requisite environment variables
-        webshell.LoadEnv()
+        // create the app
+        app := webshell.NewApp("example app", "127.0.0.1", "8080")
         // add an endpoint to our server
-        webshell.AddRoute("/hello", hello_world)
+        app.AddRoute("/", hello_world)
         // start a HTTP-only web server
-        webshell.Serve(false, nil)
+        log.Fatal(app.Serve())
 }
 ```
 
-### Configuration
+### Creating a New WebApp
 
-`webshell` by default pulls its configuration in from the environment.
-`LoadEnv()` will set the relevant variables. However, this can be
-bypassed to use your own configuration method. The relevant variables
-are (note that the environment variables have the same name):
+There are two ways to create a new webapp:
 
-* `SERVER_ADDR` contains the address the server should listen on.
-* `SERVER_PORT` contains the port the server should listen on.
-* `SSL_KEY` contains the path to the SSL private key.
-* `SSL_CERT` contains the path to the SSL certficate.
+* `NewApp(name, host, port) *WebApp` creates an HTTP app
+* `NewTLSApp(name, host, port, keypath, certpath) *WebApp` creates a new TLS
+app.
 
-For example, to load the server address from a function called
-`LoadAddressFromDB`:
+The returned app can be started with `Serve()`; an app can be queried for its
+name, host and port with the `Name()`, `Host()`, and `Port()` methods. It can
+also be queried to determine if it is a TLS app using the `IsTLS()` method.
 
-```go
-webshell.SERVER_ADDR = LoadAddressFromDB()
-```
+### Adding Routes
 
-Another alternative is the [`goconfig`](https://github.com/gokyle/goconfig)
-package.
+WebApps have three methods for adding new routes:
 
-An example shell script that can be sourced to sane defaults for the
-server may be found in `examples/env.sh`.
+* `AddRoute(route, handler)` will add a new route, panicking if the route
+couldn't be added.
+* `AddConditionalRoute(condition, route, path)` adds the route if condition
+is true; it, too, will panic on error.
+* `StaticRoute(route, path)` runs a basic file server on the directory, i.e.
+for static assets.
 
 ### Examples
 Contained in the `examples` subdirectory:
