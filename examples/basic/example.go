@@ -11,9 +11,9 @@ func hello_world(w http.ResponseWriter, r *http.Request) {
 
 func main() {
         // load the requisite environment variables
-        webshell.LoadEnv()
+        app := webshell.NewApp("webshell basic example", "127.0.0.1", "8080")
         // add an endpoint to our server
-        webshell.AddRoute("/", hello_world)
+        app.AddRoute("/", hello_world)
         // start a HTTP-only web server
-        webshell.Serve(false, nil)
+        app.Serve()
 }

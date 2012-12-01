@@ -11,10 +11,10 @@ func hello_world(w http.ResponseWriter, r *http.Request) {
 
 func main() {
         // load the requisite environment variables
-        webshell.LoadEnv()
+        app := webshell.NewApp("webshell basic example", "127.0.0.1", "8080")
         // set up our static routes
-        webshell.StaticRoute("/assets/css/", "assets/css/")
-        webshell.StaticRoute("/", "static")
+        app.StaticRoute("/assets/css/", "assets/css/")
+        app.StaticRoute("/", "static")
         // start a HTTP-only web server
-        webshell.Serve(false, nil)
+        app.Serve()
 }

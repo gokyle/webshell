@@ -7,7 +7,23 @@ import (
 )
 
 func index(w http.ResponseWriter, r *http.Request) {
-        page := "Check out /test.html and /test2.html ..."
+        page := `<!doctype html>
+<html>
+  <head>
+    <title>webshell template example</title>
+  </head>
+
+  <body>
+  <h1>webshell template example</h1>
+  <p>Take a look at the following pages:</p>
+  <ul>
+    <li><a href="/test.html">first test page</a></li>
+    <li><a href="/test2.html">second test page</a></li>
+    <li><a href="/error.html">template error page</a></li>
+   </ul>
+  </body>
+</html>
+`
         w.Write([]byte(page))
 }
 
@@ -18,7 +34,7 @@ func tpl_test(w http.ResponseWriter, r *http.Request) {
         }
         page.Title = "test page"
         page.Paragraph = "rw nw prt m hrw"
-        out, err := webshell.ServeTemplate("templates/test.html", page)
+        out, err := webshell.ServeTemplateFile("templates/test.html", page)
         if err != nil {
                 webshell.Error500(err.Error(), "text/plain", w, r)
         } else {
@@ -33,7 +49,7 @@ func tpl_test2(w http.ResponseWriter, r *http.Request) {
         }
         page.Title = "another test page"
         page.Paragraph = "Sæmundar Edda"
-        out, err := webshell.ServeTemplate("templates/test.html", page)
+        out, err := webshell.ServeTemplateFile("templates/test.html", page)
         if err != nil {
                 webshell.Error500(err.Error(), "text/plain", w, r)
         } else {
@@ -45,7 +61,7 @@ func tpl_error(w http.ResponseWriter, r *http.Request) {
         var page struct {
                 Nonsense string
         }
-        out, err := webshell.ServeTemplate("templates/test.html", page)
+        out, err := webshell.ServeTemplateFile("templates/test.html", page)
         if err != nil {
                 fmt.Println("[!] error")
                 webshell.Error500(err.Error(), "text/plain", w, r)
@@ -56,12 +72,12 @@ func tpl_error(w http.ResponseWriter, r *http.Request) {
 
 func main() {
         // load the requisite environment variables
-        webshell.LoadEnv()
+        app := webshell.NewApp("webshell basic example", "127.0.0.1", "8080")
         // add an endpoint to our server
-        webshell.AddRoute("/", index)
-        webshell.AddRoute("/test.html", tpl_test)
-        webshell.AddRoute("/test2.html", tpl_test2)
-        webshell.AddRoute("/error.html", tpl_error)
+        app.AddRoute("/", index)
+        app.AddRoute("/test.html", tpl_test)
+        app.AddRoute("/test2.html", tpl_test2)
+        app.AddRoute("/error.html", tpl_error)
         // start a HTTP-only web server
-        webshell.Serve(false, nil)
+        app.Serve()
 }
