@@ -34,7 +34,7 @@ var (
 
 func (app *WebApp) AddRoute(path string, handler RouteHandler) {
 	app.mux.HandleFunc(path, handler)
-        log.Printf("[+] route %s added\n", path)
+	log.Printf("[+] route %s added\n", path)
 }
 
 func (app *WebApp) AddConditionalRoute(condition bool, path string, handler RouteHandler) {
@@ -88,7 +88,7 @@ func GenerateTemplateErrorHandler(status int, filename string) (hdlr TemplateErr
 	return
 }
 
-func InitDefaultErrors() {
+func init() {
 	Error400 = GenerateErrorHandler(http.StatusBadRequest)
 	Error401 = GenerateErrorHandler(http.StatusUnauthorized)
 	Error403 = GenerateErrorHandler(http.StatusForbidden)
