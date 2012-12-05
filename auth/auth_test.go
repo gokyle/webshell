@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"bitbucket.org/taruti/pbkdf2"
+        "github.com/gokyle/pbkdf2"
 	"fmt"
 	"testing"
 )
@@ -35,21 +35,22 @@ func TestAuthentication(t *testing.T) {
 	fmt.Printf("[+] testing user authentication: ")
 
 	if !Authenticate("user", test_password) {
-		fmt.Println("failed")
+		fmt.Println("failed (should authenticate)")
 		t.FailNow()
 	} else if Authenticate("user", "bad password") {
-		fmt.Println("failed")
+		fmt.Println("failed (bad pass should not authenticate")
 		t.FailNow()
 	} else if Authenticate("user", "") {
-		fmt.Println("failed")
+		fmt.Println("failed (empty pass should not authenticate")
 		t.FailNow()
 	} else if Authenticate("", "") {
-		fmt.Println("failed")
+		fmt.Println("failed (empty credentials should not authenticate)")
 		t.FailNow()
 	} else if Authenticate("eve", test_password) {
-		fmt.Println("failed")
+		fmt.Println("failed (different user / same pass should not authenticate)")
 		t.FailNow()
 	}
+        fmt.Println("ok")
 }
 
 func BenchmarkAuthenticateSuccess(b *testing.B) {

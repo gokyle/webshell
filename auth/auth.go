@@ -7,7 +7,10 @@
 // The end user can store these safely in their database.
 package auth
 
-import "bitbucket.org/taruti/pbkdf2"
+import (
+        "github.com/gokyle/pbkdf2"
+        "time"
+)
 
 // AuthProviders are functions that takes a user ID and returns a salt and hash.
 type AuthProvider func(user interface{}) (salt []byte, hash []byte)
@@ -29,7 +32,7 @@ func CheckPass(password string, salt, hash []byte) bool {
 	if len(salt) == 0 || len(hash) == 0 {
 		return false
 	}
-	ph := pbkdf2.PasswordHash{salt, hash}
+	ph := &pbkdf2.PasswordHash{hash, salt}
 	return pbkdf2.MatchPassword(password, ph)
 }
 
@@ -52,4 +55,8 @@ func HashPass(password string) (salt, hash []byte) {
 	hash = ph.Hash
 	salt = ph.Salt
 	return
+}
+
+type SessionStore struct {
+        Sessions        map[string]*time.Time
 }
