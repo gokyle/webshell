@@ -58,5 +58,27 @@ func HashPass(password string) (salt, hash []byte) {
 }
 
 type SessionStore struct {
+        Name            string
         Sessions        map[string]*time.Time
+        Check           time.Duration
+}
+
+func CreateSessionStore(name string) *SessionStore {
+        store := &SessionStore{name, }
+        store.Sessions = make(map[string]*time.Time, 0)
+        return store
+}
+
+func (store *SessionStore) _checkExpired() {
+        for k, t := range store.Sessions {
+                if t.After(time.Now()) {
+                        delete store.sessions[k]
+                }
+        }
+}
+
+func (store *Session) CheckExpired() {
+        for {
+                <-time.After(store.Check)
+        }
 }
