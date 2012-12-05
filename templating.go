@@ -16,6 +16,15 @@ func CompileTemplate(filename string) (tpl *template.Template, err error) {
 	return
 }
 
+func MustCompileTemplate(filename string) (tpl *template.Template) {
+        tpl, err := CompileTemplate(filename)
+        if err != nil {
+                panic(`webshell CompileTemplate(` + filename + `): ` +
+                        err.Error())
+        }
+        return
+}
+
 func ServeTemplate(tpl *template.Template, in interface{}) (out []byte, err error) {
 	buffer := new(bytes.Buffer)
 	err = tpl.Execute(buffer, in)
