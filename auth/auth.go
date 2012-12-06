@@ -8,9 +8,31 @@
 package auth
 
 import (
+        "fmt"
         "github.com/gokyle/pbkdf2"
+        "github.com/gokyle/uuid"
+        "net/http"
+        "strconv"
         "time"
 )
+
+var (
+        DefaultCheck time.Duration
+        DefaultExpire time.Duration
+)
+
+func init() {
+        var err error
+        DefaultCheck, err = time.ParseDuration("1m")
+        if err != nil {
+                panic("auth - error parsing duration: " + err.Error())
+        }
+
+        DefaultExpire, err = time.ParseDuration("1h")
+        if err != nil {
+                panic("auth - error parsing duration: " + err.Error())
+        }
+}
 
 // AuthProviders are functions that takes a user ID and returns a salt and hash.
 type AuthProvider func(user interface{}) (salt []byte, hash []byte)
@@ -27,7 +49,7 @@ var (
 )
 
 // CheckPass compares a password to the salt/hash combination; returns true
-// if they match. It may be used in custom 
+// if they match. It may be used in custom Authenticators.
 func CheckPass(password string, salt, hash []byte) bool {
 	if len(salt) == 0 || len(hash) == 0 {
 		return false
@@ -57,28 +79,112 @@ func HashPass(password string) (salt, hash []byte) {
 	return
 }
 
+// Type SessionStore provides basic session support via authentication for Go
+// web apps. SessionStores should be created with CreateSessionStore.
 type SessionStore struct {
         Name            string
-        Sessions        map[string]*time.Time
+        Sessions        map[string]time.Time
         Check           time.Duration
+        Secure          bool
 }
 
-func CreateSessionStore(name string) *SessionStore {
-        store := &SessionStore{name, }
-        store.Sessions = make(map[string]*time.Time, 0)
+// CreateSessionStore creates new SessionStores properly.
+// Name is the name new cookies are given; this should be something that
+// identifies the cookie as a session cookie for your application. Secure
+// should be true if the app itself runs as a TLS server. If the app
+// runs behind an SSL server (i.e. an nginx proxy), it should be set to false.
+// dur is a time.Duration that specifies how long cookies will live.
+func CreateSessionStore(name string, secure bool, dur *time.Duration) *SessionStore {
+        store := &SessionStore{name, nil, DefaultCheck, secure}
+        store.Sessions = make(map[string]time.Time, 0)
+        if dur != nil {
+                store.Check = *dur
+        }
+        go store.CheckExpired()
         return store
 }
 
 func (store *SessionStore) _checkExpired() {
         for k, t := range store.Sessions {
                 if t.After(time.Now()) {
-                        delete store.sessions[k]
+                        delete(store.Sessions, k)
                 }
         }
 }
 
-func (store *Session) CheckExpired() {
+// CheckExpired typically runs in the background, launched in
+// CreateSessionStore; it may be called to manually / force check the store
+// for expired cookies.
+func (store *SessionStore) CheckExpired() {
         for {
                 <-time.After(store.Check)
+                store._checkExpired()
         }
+}
+
+// AuthSession attempts to authenticate the user; if successful, it returns a
+// cookie that can be sent to the client to set up a session.
+func (store *SessionStore) AuthSession(id interface{}, password string, r *http.Request, t *time.Duration) *http.Cookie {
+        if !Authenticate(id, password) {
+                return nil
+        }
+        val, err := uuid.GenerateV4String()
+        if err != nil {
+                return nil
+        }
+
+        if t == nil {
+                t = &DefaultExpire
+        }
+
+        c := new(http.Cookie)
+        c.Name = store.Name
+        c.Value = val
+        c.Path = "/"
+        c.Domain = r.URL.Host
+        c.Expires = time.Now().Add(*t)
+        c.Secure = false
+        c.HttpOnly = true
+        maxAge, err := strconv.Atoi(fmt.Sprintf("%.0f", t.Seconds()))
+        if err != nil {
+                return nil
+        }
+        c.MaxAge = maxAge
+
+        store.Sessions[c.Value] = c.Expires
+        return c
+}
+
+// CheckSession checks a client request to see if it contains a valid session
+// cookie. If this fails, the client should be re-authenticated.
+func (store *SessionStore) CheckSession(r *http.Request) bool {
+        for _, c := range r.Cookies() {
+                if c.Name != store.Name {
+                        continue
+                }
+                sid := c.Value
+                t, valid := store.Sessions[sid]
+                if !valid {
+                        return false
+                }
+                if time.Now().After(t) {
+                        fmt.Println("[!] cookie has expired!")
+                        return false
+                }
+                return true
+        }
+        fmt.Println("I couldn't find any valid cookies!")
+        return false
+}
+
+// DestroySession should be called for any logout action or when the session
+// should not be maintained anymore.
+func (store *SessionStore) DestroySession(r *http.Request) bool {
+        for _, c := range r.Cookies() {
+                if c.Name == store.Name && c.Domain == r.URL.Host {
+                        delete(store.Sessions, c.Value)
+                        return true
+                }
+        }
+        return false
 }
