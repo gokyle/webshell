@@ -2,6 +2,7 @@ package webshell
 
 import (
 	"crypto/tls"
+        "log"
 	"net/http"
 	"time"
 )
@@ -83,6 +84,7 @@ func NewTLSApp(name, host, port, key, cert string) *WebApp {
 // listen for and serve TLS requests. If not, it will serve standard
 // HTTP requests.
 func (app *WebApp) Serve() error {
+        log.Println("now listening on ", app.Address())
 	if app.IsTLS() {
 		return app.srv.ListenAndServeTLS(app.cert, app.key)
 	} else {
