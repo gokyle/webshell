@@ -76,7 +76,7 @@ func GenerateTemplateErrorHandler(status int, filename string) (hdlr TemplateErr
 		return
 	}
 	hdlr = func(in interface{}, w http.ResponseWriter, r *http.Request) {
-		msg, err := ServeTemplate(tpl, in)
+		msg, err := BuildTemplate(tpl, in)
 		if err != nil {
 			log.Printf("error serving template %d %s: %s\n",
 				status, filename, err.Error())

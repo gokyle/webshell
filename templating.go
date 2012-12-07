@@ -43,7 +43,7 @@ func BuildTemplateFile(filename string, in interface{}) (out []byte, err error) 
 	if err != nil {
 		return
 	}
-	out, err = ServeTemplate(tpl, in)
+	out, err = BuildTemplate(tpl, in)
 	return
 }
 
