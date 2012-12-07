@@ -25,7 +25,9 @@ func MustCompileTemplate(filename string) (tpl *template.Template) {
         return
 }
 
-func ServeTemplate(tpl *template.Template, in interface{}) (out []byte, err error) {
+// BuildTemplate takes a template and some data and returns the resulting
+// templated byte slice.
+func BuildTemplate(tpl *template.Template, in interface{}) (out []byte, err error) {
 	buffer := new(bytes.Buffer)
 	err = tpl.Execute(buffer, in)
 	if err == nil {
@@ -34,9 +36,9 @@ func ServeTemplate(tpl *template.Template, in interface{}) (out []byte, err erro
 	return
 }
 
-// ServeTemplate serves the template specified in filename, executed with the
+// BuildTemplateFile builds the template specified in filename, executed with the
 // data specified in 'in', and returns a byte slice and error.
-func ServeTemplateFile(filename string, in interface{}) (out []byte, err error) {
+func BuildTemplateFile(filename string, in interface{}) (out []byte, err error) {
 	tpl, err := CompileTemplate(filename)
 	if err != nil {
 		return
