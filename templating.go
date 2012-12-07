@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 )
 
+// CompileTemplate parses a template, and returns the template and any
+// errors that occurred.
 func CompileTemplate(filename string) (tpl *template.Template, err error) {
 	template_name := filepath.Base(filename)
 	tpl = template.New(template_name)
@@ -16,13 +18,15 @@ func CompileTemplate(filename string) (tpl *template.Template, err error) {
 	return
 }
 
+// MustCompileTemplate will compile a template, panicking if it can't be
+// compiled, simplifying initialising global templates in a safe manner.
 func MustCompileTemplate(filename string) (tpl *template.Template) {
-        tpl, err := CompileTemplate(filename)
-        if err != nil {
-                panic(`webshell CompileTemplate(` + filename + `): ` +
-                        err.Error())
-        }
-        return
+	tpl, err := CompileTemplate(filename)
+	if err != nil {
+		panic(`webshell CompileTemplate(` + filename + `): ` +
+			err.Error())
+	}
+	return
 }
 
 // BuildTemplate takes a template and some data and returns the resulting
@@ -47,7 +51,8 @@ func BuildTemplateFile(filename string, in interface{}) (out []byte, err error) 
 	return
 }
 
-// Check a template file for errors.
+// CheckTemplate will check whether the template can be loaded without
+// error.
 func CheckTemplate(filename string) (err error) {
 	template_name := filepath.Base(filename)
 	t := template.New(template_name)

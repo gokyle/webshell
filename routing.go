@@ -32,17 +32,22 @@ var (
 	Error503 func(msg, ctype string, w http.ResponseWriter, r *http.Request)
 )
 
+// AddRoute adds a route to the app. The route handler needs to match
+// the net/http specifications.
 func (app *WebApp) AddRoute(path string, handler RouteHandler) {
 	app.mux.HandleFunc(path, handler)
 	log.Printf("[+] route %s added\n", path)
 }
 
+// AddConditionalRoute adds the route and handler if the condition is
+// true.
 func (app *WebApp) AddConditionalRoute(condition bool, path string, handler RouteHandler) {
 	if condition {
 		app.AddRoute(path, handler)
 	}
 }
 
+// StaticRoute adds a new file server route for static assets.
 func (app *WebApp) StaticRoute(route string, path string) {
 	var err error
 	if len(route) == 0 {
@@ -101,6 +106,8 @@ func init() {
 
 }
 
+// ContentResponder returns the appropriate content-type for the
+// request.
 func ContentResponder(r *http.Request) string {
 	accept := r.Header["Accept"][0]
 	if accept == "" {

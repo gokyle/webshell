@@ -2,7 +2,7 @@ package webshell
 
 import (
 	"crypto/tls"
-        "log"
+	"log"
 	"net/http"
 	"time"
 )
@@ -58,6 +58,7 @@ func serverAddress(host, port string) string {
 	return ""
 }
 
+// NewApp creates a new web app.
 func NewApp(name, host, port string) *WebApp {
 	mux := http.NewServeMux()
 	srv := &http.Server{
@@ -72,6 +73,7 @@ func NewApp(name, host, port string) *WebApp {
 	return &app
 }
 
+// NewTLSApp creates a new app that will serve TLS.
 func NewTLSApp(name, host, port, key, cert string) *WebApp {
 	app := NewApp(name, host, port)
 	app.key = key
@@ -84,7 +86,7 @@ func NewTLSApp(name, host, port, key, cert string) *WebApp {
 // listen for and serve TLS requests. If not, it will serve standard
 // HTTP requests.
 func (app *WebApp) Serve() error {
-        log.Println("now listening on ", app.Address())
+	log.Println("now listening on ", app.Address())
 	if app.IsTLS() {
 		return app.srv.ListenAndServeTLS(app.cert, app.key)
 	} else {
