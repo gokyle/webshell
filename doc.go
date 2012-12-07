@@ -21,13 +21,5 @@
    take to type all this up. it is designed to minimise the time it takes
    me to get started on projects and to enable one-off temporary / single
    purpose webservers.
-
-   The environment variables SSL_KEY and SSL_CERT should point to the SSL
-   key and cert if the server is to listen for TLS connections.
-
-   The environment variables SERVER_ADDR and SERVER_PORT should contain
-   the listening address and port; at a minimum, the port is required. It
-   is acceptable to specify the port in SERVER_ADDR; if so, SERVER_PORT
-   must be left blank.
 */
 package webshell
