@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const WEBSHELL_VERSION = "2.0.0"
+const WEBSHELL_VERSION = "2.1.0"
 
 var (
 	ReadTimeout  = 3 * time.Second

@@ -26,7 +26,7 @@ func init() {
 
 func main() {
 	auth.LookupCredentials = LookupUser
-	app = webshell.NewApp("authentication tests", "", "9000")
+	app = webshell.NewApp("authentication tests", "", "7000")
 	store = auth.CreateSessionStore(`s_nm`, false, nil)
 	app.AddRoute("/", testAuth)
         app.StaticRoute("/assets/", "assets/")
@@ -52,7 +52,7 @@ func testAuth(w http.ResponseWriter, r *http.Request) {
 func serveIndex(page Page, w http.ResponseWriter, r *http.Request) {
         cookie := page.Cookie
         page.Cookie = nil
-        out, err := webshell.ServeTemplate(index, page)
+        out, err := webshell.BuildTemplate(index, page)
         if err != nil {
                 webshell.Error500(err.Error(), "text/plain", w, r)
                 return
@@ -86,7 +86,10 @@ func processForm(w http.ResponseWriter, r *http.Request) {
                 return
         }
 
-        cookie := store.AuthSession(user, pass, r, nil)
+        cookie, err := store.AuthSession(user, pass, false, "")
+        if err != nil {
+                cookie = nil
+        }
         if cookie == nil {
                 serveIndex(Page{}, w, r)
                 return

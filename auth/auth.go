@@ -12,7 +12,6 @@ import (
         "github.com/gokyle/pbkdf2"
         "github.com/gokyle/uuid"
         "net/http"
-        "strconv"
         "time"
 )
 
@@ -23,7 +22,7 @@ var (
 
 func init() {
         var err error
-        DefaultCheck, err = time.ParseDuration("1m")
+        DefaultCheck, err = time.ParseDuration("2h")
         if err != nil {
                 panic("auth - error parsing duration: " + err.Error())
         }
@@ -83,7 +82,7 @@ func HashPass(password string) (salt, hash []byte) {
 // web apps. SessionStores should be created with CreateSessionStore.
 type SessionStore struct {
         Name            string
-        Sessions        map[string]time.Time
+        Sessions        map[string]*time.Time
         Check           time.Duration
         Secure          bool
 }
@@ -96,7 +95,7 @@ type SessionStore struct {
 // dur is a time.Duration that specifies how long cookies will live.
 func CreateSessionStore(name string, secure bool, dur *time.Duration) *SessionStore {
         store := &SessionStore{name, nil, DefaultCheck, secure}
-        store.Sessions = make(map[string]time.Time, 0)
+        store.Sessions = make(map[string]*time.Time, 0)
         if dur != nil {
                 store.Check = *dur
         }
@@ -106,7 +105,7 @@ func CreateSessionStore(name string, secure bool, dur *time.Duration) *SessionSt
 
 func (store *SessionStore) _checkExpired() {
         for k, t := range store.Sessions {
-                if t.After(time.Now()) {
+                if t != nil && t.After(time.Now()) {
                         delete(store.Sessions, k)
                 }
         }
@@ -122,37 +121,71 @@ func (store *SessionStore) CheckExpired() {
         }
 }
 
-// AuthSession attempts to authenticate the user; if successful, it returns a
-// cookie that can be sent to the client to set up a session.
-func (store *SessionStore) AuthSession(id interface{}, password string, r *http.Request, t *time.Duration) *http.Cookie {
-        if !Authenticate(id, password) {
-                return nil
-        }
-        val, err := uuid.GenerateV4String()
+// NewSession creates a new session without authenticating. This should
+// be used if you are authentication in some way other than
+// Authenticate. t should be a duration specifying when the session
+// should expire, and no_expire should be true if it should never
+// expire. If no_expire is false and t is nil, the default expiration
+// will be used.
+func (store *SessionStore) NewSession() (c *http.Cookie, err error) {
+        var session_id string
+        session_id, err = uuid.GenerateV4String()
         if err != nil {
-                return nil
+                return
         }
+        t := time.Now().Add(DefaultExpire)
+        store.Sessions[session_id] = &t
 
-        if t == nil {
-                t = &DefaultExpire
-        }
-
-        c := new(http.Cookie)
+        c = new(http.Cookie)
         c.Name = store.Name
-        c.Value = val
+        c.Value = session_id
         c.Path = "/"
-        c.Domain = r.URL.Host
-        c.Expires = time.Now().Add(*t)
         c.Secure = false
         c.HttpOnly = true
-        maxAge, err := strconv.Atoi(fmt.Sprintf("%.0f", t.Seconds()))
-        if err != nil {
-                return nil
-        }
-        c.MaxAge = maxAge
+        return
+}
 
-        store.Sessions[c.Value] = c.Expires
-        return c
+// NewPSession creates a persistent session, i.e. one that survives the
+// current session.
+func (store *SessionStore) NewPSession(age string) (c *http.Cookie, err error) {
+        var session_id string
+        session_id, err = uuid.GenerateV4String()
+        if err != nil {
+                return
+        }
+        dur, err := time.ParseDuration(age)
+        if err != nil {
+                return
+        }
+        t := time.Now().Add(dur)
+        store.Sessions[session_id] = &t
+
+        c = new(http.Cookie)
+        c.Name = store.Name
+        c.Value = session_id
+        c.Path = "/"
+        c.Expires = *store.Sessions[session_id]
+        c.Secure = false
+        c.HttpOnly = true
+        return
+}
+
+
+// AuthSession attempts to authenticate the user; if successful, it returns a
+// cookie that can be sent to the client to set up a session. If
+// persistent is false, the cookie will last for the current session
+// only.
+func (store *SessionStore) AuthSession(id interface{}, pass string, persist bool, age string) (c *http.Cookie, err error) {
+        if !Authenticate(id, pass) {
+                return
+        }
+
+        if !persist {
+                c, err = store.NewSession()
+        } else {
+                c, err = store.NewPSession(age)
+        }
+        return
 }
 
 // CheckSession checks a client request to see if it contains a valid session
@@ -167,8 +200,7 @@ func (store *SessionStore) CheckSession(r *http.Request) bool {
                 if !valid {
                         return false
                 }
-                if time.Now().After(t) {
-                        fmt.Println("[!] cookie has expired!")
+                if t == nil || time.Now().After(*t) {
                         return false
                 }
                 return true

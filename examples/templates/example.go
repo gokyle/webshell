@@ -34,7 +34,7 @@ func tpl_test(w http.ResponseWriter, r *http.Request) {
         }
         page.Title = "test page"
         page.Paragraph = "rw nw prt m hrw"
-        out, err := webshell.ServeTemplateFile("templates/test.html", page)
+        out, err := webshell.BuildTemplateFile("templates/test.html", page)
         if err != nil {
                 webshell.Error500(err.Error(), "text/plain", w, r)
         } else {
@@ -49,7 +49,7 @@ func tpl_test2(w http.ResponseWriter, r *http.Request) {
         }
         page.Title = "another test page"
         page.Paragraph = "Sæmundar Edda"
-        out, err := webshell.ServeTemplateFile("templates/test.html", page)
+        out, err := webshell.BuildTemplateFile("templates/test.html", page)
         if err != nil {
                 webshell.Error500(err.Error(), "text/plain", w, r)
         } else {
@@ -61,7 +61,7 @@ func tpl_error(w http.ResponseWriter, r *http.Request) {
         var page struct {
                 Nonsense string
         }
-        out, err := webshell.ServeTemplateFile("templates/test.html", page)
+        out, err := webshell.BuildTemplateFile("templates/test.html", page)
         if err != nil {
                 fmt.Println("[!] error")
                 webshell.Error500(err.Error(), "text/plain", w, r)
