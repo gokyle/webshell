@@ -10,8 +10,8 @@ import (
 type RouteHandler func(w http.ResponseWriter, r *http.Request)
 
 // Simple name for a function that handles basic errors.
-type ErrorRoute func(string, string, http.ResponseWriter, *http.Request)
-type TemplateErrorRoute func(interface{}, http.ResponseWriter, *http.Request)
+type ErrorHandlerFn func(string, string, http.ResponseWriter, *http.Request)
+type TemplateErrorHandlerFn func(interface{}, http.ResponseWriter, *http.Request)
 
 // Generic error handlers. They take a message and content-type as a string,
 // as well as the HTTP response writer and request, and respond with the
@@ -66,7 +66,7 @@ func (app *WebApp) StaticRoute(route string, path string) {
 }
 
 // GenerateErrorHandler returns a RouteHandler function
-func GenerateErrorHandler(status int) ErrorRoute {
+func GenerateErrorHandler(status int) ErrorHandlerFn {
 	return func(msg, ctype string, w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(status)
 		w.Header().Add("content-type", ctype)
@@ -75,7 +75,7 @@ func GenerateErrorHandler(status int) ErrorRoute {
 }
 
 // GenerateTemplateErrorHandler returns a function serving a templated error
-func GenerateTemplateErrorHandler(status int, filename string) (hdlr TemplateErrorRoute, err error) {
+func GenerateTemplateErrorHandler(status int, filename string) (hdlr TemplateErrorHandlerFn, err error) {
 	tpl, err := CompileTemplate(filename)
 	if err != nil {
 		return
