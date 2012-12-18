@@ -123,10 +123,7 @@ func (store *SessionStore) CheckExpired() {
 
 // NewSession creates a new session without authenticating. This should
 // be used if you are authentication in some way other than
-// Authenticate. t should be a duration specifying when the session
-// should expire, and no_expire should be true if it should never
-// expire. If no_expire is false and t is nil, the default expiration
-// will be used.
+// Authenticate.
 func (store *SessionStore) NewSession() (c *http.Cookie, err error) {
         var session_id string
         session_id, err = uuid.GenerateV4String()
@@ -205,7 +202,6 @@ func (store *SessionStore) CheckSession(r *http.Request) bool {
                 }
                 return true
         }
-        fmt.Println("I couldn't find any valid cookies!")
         return false
 }
 
@@ -219,4 +215,24 @@ func (store *SessionStore) DestroySession(r *http.Request) bool {
                 }
         }
         return false
+}
+
+// SessionID returns the session ID and can be used to correlate a login
+// session with some other information.
+func (store *SessionStore) SessionID(r *http.Request) string {
+        for _, c := range r.Cookies() {
+                if c.Name != store.Name {
+                        continue
+                }
+                sid := c.Value
+                t, valid := store.Sessions[sid]
+                if !valid {
+                        return ""
+                }
+                if t == nil || time.Now().After(*t) {
+                        return ""
+                }
+                return sid
+        }
+        return ""
 }
