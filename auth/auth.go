@@ -8,7 +8,6 @@
 package auth
 
 import (
-        "fmt"
         "github.com/gokyle/pbkdf2"
         "github.com/gokyle/uuid"
         "net/http"
